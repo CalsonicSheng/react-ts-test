@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 // we have confirmed that THE SAME customized hooks function when called under DIFFERENT MULTIPLE COMPONENTS are only local to the TARGET component where it is called
 // all the states/logics written under the customized hooks ARE LOCAL TO THE COMPONENT WHERE THE HOOK IS CALLED

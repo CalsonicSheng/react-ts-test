@@ -1,18 +1,18 @@
-import React, { ReactElement, useContext } from 'react';
-import { GlobalStateContext } from '../context/GlobalStateContext';
-import { useCounterHook } from '../hooks/useCounterHook';
+import React, { ReactElement, useContext } from "react";
+import { GlobalStateContext } from "../context/GlobalStateContext";
+import { useCounterHook } from "../hooks/useCounterHook";
 
 function Child2(): ReactElement {
-  console.log('child2 component run');
+  console.log("child2 component run");
 
   const sharedContext: null | { parentGlobalState: number; setParentGlobalState: React.Dispatch<React.SetStateAction<number>> } = useContext(GlobalStateContext);
 
-  const { counter, setCounterHandler } = useCounterHook('Child2');
+  const { counter, setCounterHandler } = useCounterHook("Child2");
 
   return (
     <div>
       <h1>Child2 Compoent</h1>
-      <button onClick={setCounterHandler} style={{ marginRight: '10px' }}>
+      <button onClick={setCounterHandler} style={{ marginRight: "10px" }}>
         add +
       </button>
       <span>count state: {counter}</span>
@@ -29,7 +29,7 @@ function Child2(): ReactElement {
 }
 
 const Child2Object = {
-  Child2Component: Child2,
+  Child2,
 };
 
 export default Child2Object;
