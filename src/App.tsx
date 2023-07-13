@@ -5,7 +5,7 @@ import Child2Object from "./components/Child2";
 import { GlobalStateContext } from "./context/GlobalStateContext";
 import { useCounterHook } from "./hooks/useCounterHook";
 
-// outside functional component code will only run once upon mounting and does not subject to react re-rendering process to re-execute these codes
+// outside functional component code will only run once ONLY UPON COMPONENT MOUNTING and does not subject to react re-rendering process to re-execute these codes
 // all declared variables (global) are accessible under the current functional component block under this file/module
 // by convention, we must have modifiers ("const" or "let") for each declared variable (if not, then it will be treated as global variable under "window" object)
 const title: string = "Parent Component";
@@ -18,9 +18,24 @@ function App(): ReactElement {
   console.log("parent component run");
 
   // again, all the "states" when declared are only locally accessible in the TARGET component where they declared and ARE NOT shareable/accessible by other child components.
-  // any declared state when updated to ONLY DIFFERENT VALUE will trigger the target component to re-render NO MATTER IF THE STATE IS USED OR NOT AFTER DECLARATION.
+  // any state update function should only be called under either event handler or lifecycle hook callback function, CAN NOT call direcly under component function body to avoid infinite loop.
+  // we can also see if the state update results the same previous state value, then the component will NOT re-render.
   const [parentGlobalState, setParentGlobalState] = useState<number>(11111);
-  const { counter, setCounterHandler } = useCounterHook("parent");
+  const { counter, setCounterHandler }: { counter: number; setCounterHandler: () => void } = useCounterHook("parent");
+
+  // batch state and state updates
+  // we can see react will batch all the state updates when they are grouped under the single event handler function
+  // state2 update uses state1 value, but this state1 value is not the latest state1 value, but the state1 value when the event handler function is called (very important)
+  // this meanings the batch update uses the latest state value BEFORE the event handler function is called, but not the latest state value AFTER the state update function is called
+  // if state2 update needs to use the latest state1 value, then we need to use "useEffect" hook to run the state2 update function AFTER the state1 update function is completed
+  // this is the problem of state update ordering, we can use "useEffect" hook to solve this problem (very important)
+  const [state1, setState1] = useState<number>(333);
+  const [state2, setState2] = useState<number>(666);
+
+  function batchUpdateHandler(): void {
+    setState1(state1 + 1);
+    setState2(state1 * 100);
+  }
 
   // we have tested that all useEffect hooks' callback functions will ONLY RUN AFTER ALL elements + children components are fully rendered under COMPONENT WHERE THEY DECLARED
   // if there are two or more "useEffect" hooks, then all of their callback functions will run IN THE ORDER when they declared (no suprise here)
@@ -41,7 +56,13 @@ function App(): ReactElement {
         <button onClick={setCounterHandler} style={{ marginRight: "10px" }}>
           add +
         </button>
-        <span>count state: {counter}</span>
+        <span>count couner state: {counter}</span>
+        <div />
+        <button onClick={batchUpdateHandler} style={{ marginRight: "10px" }}>
+          batch update
+        </button>
+        <p>state1: {state1}</p>
+        <p>state2: {state2}</p>
 
         <div style={{ display: "flex", marginTop: "50px" }}>
           {/* all child component will gain access to context value without using props at all WHEN THEY ARE WRAPPED UNDER TARGET CONTEXT PROVIDER COMPONENT*/}
