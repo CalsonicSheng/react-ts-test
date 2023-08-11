@@ -19,6 +19,8 @@ export default function Child1({ a, b }: { a: number; b: number }): ReactElement
         add +
       </button>
       <span>count state: {counter}</span>
+      {/* sharedContext is potentially null, we use optional chaining "?" */}
+      {/* this is to check if the object is "null" or "undefined", if yes, will immediately return undefined without attempting to access the property to prevent a TypeError  */}
       <h3>context shared state: {sharedContext?.parentGlobalState}</h3>
       <button
         onClick={() => {
