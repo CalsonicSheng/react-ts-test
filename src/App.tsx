@@ -55,11 +55,14 @@ function App(): ReactElement {
   console.log("parent component run");
 
   // by default, the state declared in a React component is local and private to that component. Other components cannot directly access or modify this state.
-  // but state can be passed down to child components as props, which can be used in the child component afterwards (very important)
-  // the state update function "setState" is also passed down to child components as props, which can be used to update the state of the parent component (very important)
+  // but state can be shared through props + context | as we learning, st ate sharing is always DOWNWARDS (not upwards) to child components as props (very important)
+  // "the concept of lifting state up" is to pass setState function DOWN to child component as props, so that child component can update the state of parent component using its own state
+  // the state update function "setState" is also passed down to child components as props, which can be used to update and re-render of parent component where it is originally delcared
   // the re-rendering process only takes place on the component where the state is originally declared, and any child components under it (very important)
-  // any state update function should only be called (after declaration) under either event handler or lifecycle hook. CAN NOT call direcly under component function body to avoid infinite loop.
-  // we can also see if the state update results the same previous state value, then the component will NOT re-render.
+  // child component will always re-render when parent component re-render (no matter state is passed down or not), but parent component will not re-render when child component re-render
+  // any state update function should only be called (after declaration) under either event handler or lifecycle hook. CAN NOT call direcly under component function body to avoid infinite re-render.
+  // re-rendering process will always happen when state update function is called (re-rendering is concept only in react), to produce a NEW V-DOM tree, the actual R-DOM update will only take
+  // place when there is actual difference between the NEW V-DOM tree and the OLD V-DOM tree. This is the time when you will see componet is re-called again (very important)
   const [parentGlobalState, setParentGlobalState] = useState<number>(11111);
   const { counter, setCounterHandler }: { counter: number; setCounterHandler: () => void } = useCounterHook("parent");
 
