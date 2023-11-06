@@ -2,9 +2,7 @@ import React, { ReactElement, useContext } from "react";
 import { GlobalStateContext } from "../context/GlobalStateContext";
 import { useCounterHook } from "../hooks/useCounterHook";
 
-export default function Child1({ a, b }: { a: number; b: number }): ReactElement {
-  console.log("child1 component run");
-
+export default function Child1({ a, b }: { a: number; b: number; c: string; d: number }): ReactElement {
   // context type here must match with the type we defined previously (very important)
   const sharedContext: null | { parentGlobalState: number; setParentGlobalState: React.Dispatch<React.SetStateAction<number>> } = useContext(GlobalStateContext);
 

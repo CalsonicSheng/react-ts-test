@@ -6,39 +6,69 @@ import { useCounterHook } from "./hooks/useCounterHook";
 
 /*
 
-- in client side, its all about react (next.js also uses react purely in client), each page is built and rendered based on corresponding page-level functional component
+- in client side, its all about react each page is built and rendered based on corresponding page-level functional component at client side with matching route
 
-- there are also other re-useable components that can be used in multiple different page-level functional components | altogether they form a different page
+- there are also other re-useable or children components that can be used in the page-level functional components
 
-- the navigation in these framework is client-side default, the previous page-level functional component will be unmounted and the new page-level functional component will be mounted
-the framework switches and re-renders the corresponding functional components on the client-side, without requiring a full-page reload (very important)
+- the navigation in these framework is client-side default, the previous page-level functional component will be unmounted and the new page-level functional component will be mounted.
 
-  - note mounting/unmounting is also a re-rendering process, so the component will run all the codes inside the component function body again (very important)
+- "onMount" is also a "re-rendering" process
 
-  - but react lifecycle hooks will recognize the mounting/unmounting/re-rendering process differently for you (very important)
+  - when onMount, the corresponding FE functional component will run all its js codes FIRST TIME on the client-side (just like re-rendering), without requiring a full-page reload (very important)
 
-  - Mounting: When a component is FIRST created and added to the DOM
+    - this is because all the process is handled entirely by FE js code that updates DOM element accordingly for new page component and data fetching is also handled by FE js code 
+    through AJAX (very important)
+    
+    - in previously traditional nav, browser will make a request to server to fetch the whole new html file, and then replace the whole page in the browser, results in a full page 
+    reload (very important)
 
-  - Re-rendering: When a component is updated with new state data
-
-  - Unmounting: When a component is removed from the DOM
-
-- the data fetching in react framework is also client-side default (next.js gives more flexbility) and largely use AJAX
-
-  - this means the ajax function is used under the component function body and is called only upon onmount or upon state change (this is why it is largely called under lifecycle hook) 
-  or called only upon certain user interaction (this is to prevent infinite fetching loop if it is directly called under component function body)
+    - browser is not involved in this nav process for fetching, and no html file replacement is conducted, so no full page reload is required (very important)
   
-  - AJAX is the standard default way to fetch data in react framework, this request/response process is handled entirely by js code and not by the browser itself (very important)
+  - If new data is needed from page component onMount, that data is retrieved through ajax, not a whole new HTML page. Once the data is fetched, it's managed and tracked by the component's state 
+  ensures that only the necessary parts of the DOM are updated in response to state changes (no full page reload is required).
 
-  - AJAX is primarily used for fetching specific data from the server, commonly in JSON format or other structured data formats (not file), to update specific parts of a web page dynamically, 
-  without requiring a full page reload. However, any traditional fetching (HTML forms (GET or POST) or links (<a> tags)) is to fetch the entire page (html file) from the server and 
-  replace the entire page in the browser with the new page that cause full page reload.
+    - ajax typically used to fetch data in the form of JSON, XML, or other text-based format that can be processed by JS code and affect DOM. This is because the primary purpose of AJAX is 
+    to update PARTS of a web page without requiring a full page reload (this is why it is not used for fetch whole new html file).
 
-  - once these fetched json data are received, they are used to update the state of the component, which will trigger the react's optimized re-rendering process of the component (very important)
+    - comparing to traditional fetching which involve the browser making a request through browser search bar (GET request), HTML forms (GET or POST) or links (<a> tags)) to fetch the entire 
+    page (html file) from the server. This will later replace the entire page in the browser, results in a full page reload (very important)
 
-  - all these ajax is async function, which can be handled by either promise or async/await fashiion (very important) | as we have learned, once they are called, their underlying time-consuming 
-  operation is automatically offloaded to async api to execute (which can execute multiple in parallel) WITHOUT BLOCKING REST OF THE CODE, and all their callback logics will also be AUTOMATICALLY 
-  called AGAIN when time-consuming operation is completed by js main thread (very important)
+    - ajax is also conducted asynchrously, this means rest of the js code will not be blocked by the ajax request, and will continue to run while waiting for the ajax response (very important)
+
+- re-rendering overall:
+
+  - full re-rendering process involve following 4 steps when a state update function/navigation/switching is conducted:
+
+    1. recall/re-execute target componment function body: React will call the component function again with the updated state and props to get the latest processed JSX code.
+
+    2. Create a New Virtual DOM Tree: React will create a new virtual DOM tree (based on latest comopnent jsx with updates state) from the returned JSX.
+
+    3. Diffing/reconciliation: React will compare this new virtual DOM tree with the previous one to find the differences (or "diffs").
+
+    4. Update the Real DOM: React will update the real DOM to match the new virtual DOM, but only the parts that have changed. (efficient than updating the entire DOM).
+
+  - if states remains the same after update, if you use the useState hook and set the state to the same value it already has, React will bail out of the re-render process early and won’t 
+  re-call/execute the component function and all rest of the process.
+
+    - the re-rendering process is still triggered (very important), but the steps are mostly skipped, and the component function is not re-called/execute again 
+
+  - re-rendering can be triggered by:
+
+    - component switching
+
+    - component navigation
+
+    - state update function call (major)
+
+  - re-rendering types:
+
+    - onMounting: When a component is FIRST created and added to the DOM
+
+    - Re-rendering: When a component is updated with new state data
+
+    - Unmounting: When a component is removed from the DOM
+    
+    react lifecycle hooks will recognize and differentiate these types 
 
 */
 
@@ -52,32 +82,44 @@ console.log("parent outside runs");
 // ---------------------------------------------------------------------------------------------------------------------
 
 function App(): ReactElement {
-  console.log("parent component run");
-
+  // any declared state will be persistent and tracked for the lifespan of that component across multiple re-renders until the component is unmounted (very important)
   // by default, the state declared in a React component is local and private to that component. Other components cannot directly access or modify this state.
-  // but state can be shared through props + context | as we learning, st ate sharing is always DOWNWARDS (not upwards) to child components as props (very important)
+  // but state can be shared through props / context | as we learned, state sharing is always DOWNWARDS (not upwards) to child components as props (very important)
   // "the concept of lifting state up" is to pass setState function DOWN to child component as props, so that child component can update the state of parent component using its own state
-  // the state update function "setState" is also passed down to child components as props, which can be used to update and re-render of parent component where it is originally delcared
-  // the re-rendering process only takes place on the component where the state is originally declared, and any child components under it (very important)
+  // the re-rendering process only takes place on the target component where the state is originally declared, and any child components under it (very important)
   // child component will always re-render when parent component re-render (no matter state is passed down or not), but parent component will not re-render when child component re-render
   // any state update function should only be called (after declaration) under either event handler or lifecycle hook. CAN NOT call direcly under component function body to avoid infinite re-render.
-  // re-rendering process will always happen when state update function is called (re-rendering is concept only in react), to produce a NEW V-DOM tree, the actual R-DOM update will only take
-  // place when there is actual difference between the NEW V-DOM tree and the OLD V-DOM tree. This is the time when you will see componet is re-called again (very important)
   const [parentGlobalState, setParentGlobalState] = useState<number>(11111);
   const { counter, setCounterHandler }: { counter: number; setCounterHandler: () => void } = useCounterHook("parent");
 
-  // batch state updates
-  // we can see react will batch all the state updates when they are grouped under the single event handler function call "batchUpdateHandler"
-  // state2 update uses state1 value, but this state1 value is not the latest state1 value AFTER UPDATE, but is the value BEFORE event handler function is called (very important)
-  // this meanings the batch update uses the latest state value BEFORE the event handler function is called, but not the latest state value AFTER the state update function is called
-  // if state2 update needs to use the latest state1 value, then we need to use "useEffect" hook to run the state2 update function AFTER the state1 update function is completed
-  // this is the STATE UPDATE ORDERING, we can use "useEffect" hook to solve this problem (very important)
   const [state1, setState1] = useState<number>(333);
   const [state2, setState2] = useState<number>(666);
 
+  // Under the same function, if state update function is called and its state is also accessed, then access of state will always be the OLD previous state value before the call (very important)
+  // note, its always recommended to use functional callback form to update state if update depends on previous state value (very important)
+  // only the functional callback parameter will always be the latest state value (very important)
+  // the state value outside the function will be updated immediately and corresponding after batching however
   function batchUpdateHandler(): void {
-    setState1(state1 + 1);
-    setState2(state1 * 100);
+    console.log("batch update handler run");
+    // console.log("state2", state2);
+
+    setState1((pre: number) => {
+      // 333
+      console.log("pre1", pre);
+      return pre + 1;
+    });
+
+    // stay as 333 (the old value before the call) under the function body
+    console.log("state1-1", state1);
+
+    setState1((pre: number) => {
+      // 334
+      console.log("pre2", pre);
+      return pre + 1;
+    });
+
+    // still stay as 333 (the old value before the call) under the function body
+    console.log("state1-2", state1);
   }
 
   // we have tested that all useEffect hooks' callback functions will ONLY RUN AFTER ALL elements + children components are fully rendered under COMPONENT WHERE THEY DECLARED
@@ -108,8 +150,9 @@ function App(): ReactElement {
         <p>state2: {state2}</p>
 
         <div style={{ display: "flex", marginTop: "50px" }}>
-          {/* all child component will gain access to context value without using props at all WHEN THEY ARE WRAPPED UNDER TARGET CONTEXT PROVIDER COMPONENT*/}
-          <Child1 {...c1Props} />
+          {/* when we call functional component, we have to use <> syntax, but not () | param/prop assignment is "identify = value" style + without comma + all resolve into object */}
+          {/* all child component will auto gain access to context value without using props at all WHEN THEY ARE WRAPPED UNDER TARGET CONTEXT PROVIDER COMPONENT*/}
+          <Child1 c='dsd' {...c1Props} d={3} />
           {/* we can also wrap the functional component under js object and use in this way */}
           <Child2Object.Child2 />
         </div>

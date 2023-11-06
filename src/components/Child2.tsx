@@ -3,8 +3,6 @@ import { GlobalStateContext } from "../context/GlobalStateContext";
 import { useCounterHook } from "../hooks/useCounterHook";
 
 function Child2(): ReactElement {
-  console.log("child2 component run");
-
   const sharedContext: null | { parentGlobalState: number; setParentGlobalState: React.Dispatch<React.SetStateAction<number>> } = useContext(GlobalStateContext);
 
   const { counter, setCounterHandler } = useCounterHook("Child2");
