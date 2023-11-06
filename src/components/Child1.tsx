@@ -2,7 +2,7 @@ import React, { ReactElement, useContext } from "react";
 import { GlobalStateContext } from "../context/GlobalStateContext";
 import { useCounterHook } from "../hooks/useCounterHook";
 
-export default function Child1({ a, b }: { a: number; b: number; c: string; d: number }): ReactElement {
+export default function Child1({ a = 3, b, children }: { a?: number; b: number; c: string; d: number; children: ReactElement }): ReactElement {
   // context type here must match with the type we defined previously (very important)
   const sharedContext: null | { parentGlobalState: number; setParentGlobalState: React.Dispatch<React.SetStateAction<number>> } = useContext(GlobalStateContext);
 
@@ -11,6 +11,7 @@ export default function Child1({ a, b }: { a: number; b: number; c: string; d: n
   return (
     <div style={{ marginRight: "120px" }}>
       <h1>Child 1 component</h1>
+      {children}
       <p>{a}</p>
       <p>{b}</p>
       <button onClick={setCounterHandler} style={{ marginRight: "10px" }}>

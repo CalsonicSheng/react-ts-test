@@ -1,7 +1,4 @@
-// if (true) {
-//   const x = 3;
-// } else {
-//   const x = 4;
-// }
-
-// console.log(x);
+// const x = null;
+// const y = undefined;
+// console.log(x?.a);
+// console.log(y?.a);
